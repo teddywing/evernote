@@ -1,47 +1,36 @@
 # evernote #
-This gem is a high level wrapper around Evernote's Thrift-generated ruby code. It bundles up Evernote's thrift-generated code and creates some simple wrapper classes.
+This gem is a high level wrapper around Evernote's Thrift-generated ruby code. It bundles up Evernote's thrift-generated code and creates some simple wrapper classes. Based from Chris Sepic's gem this gem (a work in progress) is different in the following ways:
+
+* Will only support Oauth for authentication.  You'll need your access token to use the gem.
+* Vendors the thrift code.  It wasn't working for me using Thrift 0.8 and thrift-client gems.  Vendored code comes from the evernote-ruby-sdk.
+* Reflects that fact that evernote is sharded and the notestore URL should be stored as part of the user profile (not defaulted)
 
 # setup #
-Get a "Client application" API key from Evernote (http://www.evernote.com/about/developer/api/#key), which gives you a "consumer_key" and "consumer_secret" (note that a "web application" API key uses OAuth to authenticate and will not work).  Put the key in a YML file or any other place you put configuration information.  Also, get yourself a username and password on both their sandbox system (http://sandbox.evernote.com) and live system.  You will be using sandbox for testing.
+Get a "Client application" API key from Evernote (http://www.evernote.com/about/developer/api/#key), which gives you a "consumer_key" and "consumer_secret". Put the key in a YML file or any other place you put configuration information.  Also, get yourself account on both their sandbox system (http://sandbox.evernote.com) and live system.  You will be using sandbox for testing.
+
+For rails users, configure gems in your Gemfile and 'bundle install'
+	gem 'evernote', :github => 'kipcole9/evernote'
+	gem 'omniauth-evernote', :github => 'kipcole9/omniauth-evernote'
+	
+Start your app server and visit '/auth/evernote' to start the app oauth authorization process for your account.  Note this requires creating a 'auth_sessions' controller (see omniauth documentation for details).  At the end of that process you will have your access token which you'll need to use this gem.
 
 # usage #
-This script is also located in /example.rb
 
-    require 'evernote'
+Once you got your access token, you could do something like list all of your notebooks:
 
-    user_store_url = "https://sandbox.evernote.com/edam/user"
-      
-    config = {
-       :username => 'YOUR_USERNAME',
-       :password => 'YOUR_PASSWORD',
-       :consumer_key => 'YOUR_CONSUMER_KEY_FROM_EVERNOTE',
-       :consumer_secret => 'YOUR_CONSUMER_SECRECT_FROM_EVERNOTE'
-             }
-               
-    user_store = Evernote::UserStore.new(user_store_url, config)
+    note_store = Evernote::NoteStore.new(notestore_url, access_token)
 
-    auth_result = user_store.authenticate
-    user = auth_result.user
-    auth_token = auth_result.authenticationToken
-    puts "Authentication was successful for #{user.username}"
-    puts "Authentication token = #{auth_token}"
-
-Once you've authenticated, you could do something like list all of your notebooks:
-
-    note_store_url = "http://sandbox.evernote.com/edam/note/#{user.shardId}"
-    note_store = Evernote::NoteStore.new(note_store_url)
-
-    notebooks = note_store.listNotebooks(auth_token)
+    notebooks = note_store.list_notebooks
     puts "Found #{notebooks.size} notebooks:"
-    default_notebook = notebooks[0]
+    default_notebook = notebooks.first
     notebooks.each { |notebook| puts "  * #{notebook.name}"}
+
+Note that we're using Ruby-style method names (which will be transformed to the underlying thrift camel-case method names) and that the access token will be unshifted onto the argument array so you don't need to supply it for each method invocation.
 
 The evernote API can be viewed at http://www.evernote.com/about/developer/api/ref/
 
-If the vendored code is out of date and you get an error indicating so, feel free to create an issue at http://github.com/cgs/evernote/issues
-
-# TODO #
-* OAuth support - will gladly accept a patch for this!
+# to do #
+This is a work in progress and not ready for anything except experimentation.  Only the notestore api is working.
 
 # contributors #
 Thanks to the following peeps for helping out:
