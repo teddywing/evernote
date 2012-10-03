@@ -1,11 +1,10 @@
-# evernote #
+# Evernote #
 This gem is a high level wrapper around Evernote's Thrift-generated ruby code. It bundles up Evernote's thrift-generated code and creates some simple wrapper classes. Based from Chris Sepic's gem this gem (a work in progress) is different in the following ways:
 
 * Will only support Oauth for authentication.  You'll need your access token to use the gem.
 * Vendors the thrift code.  It wasn't working for me using Thrift 0.8 and thrift-client gems.  Vendored code comes from the evernote-ruby-sdk.
-* Reflects that fact that evernote is sharded and the notestore URL should be stored as part of the user profile (not defaulted)
 
-# setup #
+# Setup #
 Get a "Client application" API key from Evernote (http://www.evernote.com/about/developer/api/#key), which gives you a "consumer_key" and "consumer_secret". Put the key in a YML file or any other place you put configuration information.  Also, get yourself account on both their sandbox system (http://sandbox.evernote.com) and live system.  You will be using sandbox for testing.
 
 For rails users, configure gems in your Gemfile and 'bundle install'
@@ -15,7 +14,7 @@ For rails users, configure gems in your Gemfile and 'bundle install'
 	
 Start your app server and visit '/auth/evernote' to start the app oauth authorization process for your account.  Note this requires creating a 'auth_sessions' controller (see omniauth documentation for details).  At the end of that process you will have your access token which you'll need to use this gem.
 
-# usage #
+# Usage #
 
 Once you got your access token, you could do something like list all of your notebooks:
 
@@ -30,10 +29,10 @@ Note that we're using Ruby-style method names (which will be transformed to the 
 
 The evernote API can be viewed at http://www.evernote.com/about/developer/api/ref/
 
-# to do #
+# To Do #
 This is a work in progress and not ready for anything except experimentation.  Only the notestore api is working.
 
-# contributors #
+# Contributors #
 Thanks to the following peeps for helping out:
 
 * Peter Mangiafico (peetucket)
