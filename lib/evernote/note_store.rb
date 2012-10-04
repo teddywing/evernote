@@ -12,7 +12,6 @@ module Evernote
     def notebooks(*args)
       @notebooks ||= list_notebooks(*args).inject([]) do |books, book|
         books.push Notebook.new(self, book)
-        books
       end
     end
     
@@ -45,12 +44,12 @@ module Evernote
     
     def updated_since(time, rows = max)
       @filter = NoteFilter.new(:notebook_guid => notebook.guid, :words => "updated:#{time.strftime(DATE_FORMAT)}")
-      @notes = wrap_notes(notestore.find_notes(filter, offset, rows).notes)
+      @notes = wrap_notes(notestore.find_notes(filter.filter, offset, rows).notes)
     end
     
     def created_since(time, rows = max)
       @filter = NoteFilter.new(:notebook_guid => notebook.guid, :words => "created:#{time.strftime(DATE_FORMAT)}")
-      @notes = wrap_notes(notestore.find_notes(filter, offset, rows).notes)
+      @notes = wrap_notes(notestore.find_notes(filter.filter, offset, rows).notes)
     end
     
     def method_missing(name, *args, &block)
@@ -61,7 +60,6 @@ module Evernote
     def wrap_notes(notes)
       notes.inject([]) do |notes, note|
         notes.push Note.new(notestore, note)
-        notes
       end
     end
     
@@ -126,7 +124,7 @@ module Evernote
     def initialize(options = {})
       @filter = Evernote::EDAM::NoteStore::NoteFilter.new
       options.each do |method, value|
-        @filter.send "#{method}=", value
+        send "#{method}=", value
       end
     end
     
