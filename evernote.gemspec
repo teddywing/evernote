@@ -18,8 +18,12 @@ Gem::Specification.new do |s|
   
   s.add_development_dependency "rspec"
   s.add_development_dependency "yard"
+  
+  s.extensions  = ['ext/extconf.rb']
+  s.executables = ['thrift_native']
  
-  s.files = Dir.glob("{lib,spec,vendor}/**/*") +
+  s.files = Dir.glob("{lib,spec,vendor}/**/*") + Dir.glob('ext/**/*.{c,h,rb}') +
     %w(LICENSE README.mkd Rakefile .gitignore example.rb)
+  
   s.require_path = 'lib'
 end

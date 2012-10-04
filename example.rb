@@ -1,3 +1,6 @@
+#
+# TODO - Not compatible with this version of the Gem which only support oauth.
+#
 require 'rubygems'
 require 'evernote'
 

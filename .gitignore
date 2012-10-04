@@ -5,3 +5,5 @@ rdoc
 pkg
 *.o
 *.bundle
+ext/Makefile
+ext/mkmf.log
