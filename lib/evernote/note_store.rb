@@ -44,16 +44,12 @@ module Evernote
     end
     
     def updated_since(time, rows = max)
-      @filter = NoteFilter.new
-      @filter.notebook_guid = notebook.guid
-      @filter.words = "updated:#{time.strftime(DATE_FORMAT)}"
+      @filter = NoteFilter.new(:notebook_guid => notebook.guid, :words => "updated:#{time.strftime(DATE_FORMAT)}")
       @notes = wrap_notes(notestore.find_notes(filter, offset, rows).notes)
     end
     
     def created_since(time, rows = max)
-      @filter = NoteFilter.new
-      @filter.notebook_guid = notebook.guid
-      @filter.words = "created:#{time.strftime(DATE_FORMAT)}"
+      @filter = NoteFilter.new(:notebook_guid => notebook.guid, :words => "created:#{time.strftime(DATE_FORMAT)}")
       @notes = wrap_notes(notestore.find_notes(filter, offset, rows).notes)
     end
     
@@ -127,8 +123,11 @@ module Evernote
   class NoteFilter
     attr_reader :filter
     
-    def initialize
+    def initialize(options = {})
       @filter = Evernote::EDAM::NoteStore::NoteFilter.new
+      options.each do |method, value|
+        @filter.send "#{method}=", value
+      end
     end
     
     def method_missing(name, *args, &block)
