@@ -1,3 +1,6 @@
+# Needed for camelize
+require 'active_support/core_ext/string/inflections'
+
 module Evernote
   class NoteStore
     attr_reader :access_token, :notestore
@@ -13,6 +16,14 @@ module Evernote
       @notebooks ||= list_notebooks(*args).inject([]) do |books, book|
         books.push Notebook.new(self, book)
       end
+    end
+    
+    def update_count
+      sync_state.updateCount
+    end
+    
+    def sync_state
+      @sync_state ||= self.get_sync_state
     end
     
     # Camelize the method names for ruby consistency and push the access_token to the front of the args array
@@ -36,6 +47,9 @@ module Evernote
       @notes || all
     end
     
+    # TODO turn filter params into options
+    # where(:created => 'since', :updated => 'since', :words => '.....')
+    # ie. mimic the AR interface as much as practical
     def all(rows = max)
       @filter = NoteFilter.new
       @filter.notebook_guid = notebook.guid
@@ -73,14 +87,18 @@ module Evernote
       @note = note
     end
 
-    def content(options = :all)
-      @content ||= get_content(options)
+    def content(options = :enml)
+      @content ||= content!(options)
+    end
+    
+    def content!(options = :enml)
+      @content = notestore.get_note(*args_from(options).unshift(note.guid))
     end
     
     def enml
       content.content
     end
-    
+
     def created
       @created ||= Time.at(note.created / 1000)
     end
@@ -98,11 +116,13 @@ module Evernote
     end
     
     def resources
-      note.resources || []
+      @resources ||= note.resources.inject([]) do |resources, resource|
+        resources.push Resource.new(notestore, resource)
+      end rescue []
     end
     
-    def get_content(options = :all)
-      notestore.get_note(*args_from(options).unshift(note.guid))
+    def tags
+      @tags ||= notestore.get_note_tag_names(note.guid)
     end
     
     def method_missing(name, *args, &block)
@@ -111,16 +131,40 @@ module Evernote
     
   private
     def args_from(options)
-      if options == :all
-        return true, true, false, false
-      elsif options == :enml
-        return true, false, false, false
-      else
-        return true, false, false, false
+      options = :enml unless [:enml, :all].include?(options)
+      case options
+      when :all
+        [true, true, false, false]
+      when :enml
+        [true, false, false, false]
       end
     end
-
+  end
+  
+  class Resource
+    attr_reader :notestore, :resource
+    WITH_DATA           = true
+    WITH_RECOGNITION    = false
+    WITH_ATTRIBUTES     = false
+    WITH_ALTERNATE_DATA = false
     
+    def initialize(notestore, resource)
+      @notestore = notestore
+      @resource = resource
+    end
+    
+    def body
+      @body ||= resource.data.body || 
+                notestore.get_resource(self.guid, WITH_DATA, WITH_RECOGNITION, WITH_ATTRIBUTES, WITH_ALTERNATE_DATA).data.body
+    end
+    
+    def mime_type
+      defined?(Mime::Type) ? Mime::Type.lookup(self.mime) : self.mime
+    end
+    
+    def method_missing(name, *args, &block)
+      @resource.send(name.to_s.camelize(:lower), *args, &block)
+    end    
   end
   
   class NoteFilter
