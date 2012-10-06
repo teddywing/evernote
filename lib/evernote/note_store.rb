@@ -31,7 +31,7 @@ module Evernote
       @offset = 0
       @max    = 100
     end
-    
+
     def notes
       @notes || all
     end
@@ -39,7 +39,7 @@ module Evernote
     def all(rows = max)
       @filter = NoteFilter.new
       @filter.notebook_guid = notebook.guid
-      @notes = wrap_notes(notestore.find_notes(filter, offset, rows).notes)
+      @notes = wrap_notes(notestore.find_notes(filter.filter, offset, rows).notes)
     end
     
     def updated_since(time, rows = max)
@@ -72,9 +72,9 @@ module Evernote
       @notestore = notestore
       @note = note
     end
-    
+
     def content(options = :all)
-      @content ||= notestore.get_note(*args_from(options).unshift(note.guid))
+      @content ||= get_content(options)
     end
     
     def enml
@@ -101,6 +101,10 @@ module Evernote
       note.resources || []
     end
     
+    def get_content(options = :all)
+      notestore.get_note(*args_from(options).unshift(note.guid))
+    end
+    
     def method_missing(name, *args, &block)
       @note.send(name.to_s.camelize(:lower), *args, &block)
     end
@@ -115,6 +119,7 @@ module Evernote
         return true, false, false, false
       end
     end
+
     
   end
   
