@@ -130,6 +130,7 @@ module Evernote
     end
     
   private
+    # Arguments are with_data, with_recognition, with_attributes, with_alternate_data
     def args_from(options)
       options = :enml unless [:enml, :all].include?(options)
       case options
