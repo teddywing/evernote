@@ -5,8 +5,8 @@ $LOAD_PATH.unshift lib unless $LOAD_PATH.include?(lib)
 require "evernote/version"
 
 Gem::Specification.new do |s|
-  s.name = "evernote"
-  s.version = Evernote::VERSION
+  s.name        = "evernote"
+  s.version     = Evernote::VERSION
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["Kip Cole", "Chris Sepic"]
   s.email       = ["kipcole9@gmail.com", "chris.sepic@gmail.com"]
@@ -15,6 +15,9 @@ Gem::Specification.new do |s|
   s.description = "A high level wrapper around Evernote's Thrift-generated ruby code. It bundles up Evernote's thrift-generated code and creates some simple wrapper classes. Also vendors Thrift to ensure compatibility."
  
   s.required_rubygems_version = ">= 1.3.6"
+  
+  # Activesupport provides the #camelize function we use
+  s.add_dependency "activesupport"
   
   s.add_development_dependency "rspec"
   s.add_development_dependency "yard"

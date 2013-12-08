@@ -7,3 +7,5 @@ pkg
 *.bundle
 ext/Makefile
 ext/mkmf.log
+Makefile
+mkmf.log
